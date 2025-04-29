@@ -1,6 +1,6 @@
 (defpackage :tokens
   (:use #:cl)
-  (:export #:make-token #:token-type #:token-lexeme #:token-literal #:token-line))
+  (:export #:token #:make-token #:token-type #:token-lexeme #:token-literal #:token-line))
 
 (in-package :tokens)
 
