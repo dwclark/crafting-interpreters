@@ -24,7 +24,7 @@
 				 "while" t-while)
 			       :test #'equal))
 
-(defparameter *parsing* nil)
+(defparameter *scanning* nil)
 (defparameter *on-error* nil)
 (defparameter *start* 0)
 (defparameter *current* 0)
@@ -32,16 +32,16 @@
 (defparameter *tokens* nil)
 
 (defun at-endp ()
-  (>= *current* (length *parsing*)))
+  (>= *current* (length *scanning*)))
 
 (defun advance ()
-  (let ((ret (aref *parsing* *current*)))
+  (let ((ret (aref *scanning* *current*)))
     (incf *current*)
     ret))
 
 (defun match-p (expected)
   (cond ((at-endp) nil)
-	(t (cond ((not (char= (aref *parsing* *current*) expected)) nil)
+	(t (cond ((not (char= (aref *scanning* *current*) expected)) nil)
 		 (t (incf *current*)
 		    t)))))
 
@@ -57,15 +57,15 @@
 (defun peek ()
   (if (at-endp)
       #\Nul
-      (aref *parsing* *current*)))
+      (aref *scanning* *current*)))
 
 (defun peek-next ()
-  (if (>= (1+ *current*) (length *parsing*))
+  (if (>= (1+ *current*) (length *scanning*))
       #\Nul
-      (aref *parsing* (1+ *current*))))
+      (aref *scanning* (1+ *current*))))
 
 (defun add-token (t-type &optional (literal nil))
-  (vector-push-extend (make-token :type t-type :lexeme (subseq *parsing* *start* *current*)
+  (vector-push-extend (make-token :type t-type :lexeme (subseq *scanning* *start* *current*)
 				  :literal literal :line *line*)
 		      *tokens*))
 
@@ -80,7 +80,7 @@
       (return-from string-literal))
 
   (advance)
-  (add-token 't-string (subseq *parsing* (1+ *start*) (1- *current*))))
+  (add-token 't-string (subseq *scanning* (1+ *start*) (1- *current*))))
 
 (defun number-literal ()
   (loop while (digit-char-p (peek))
@@ -91,12 +91,12 @@
     (loop while (digit-char-p (peek))
 	  do (advance)))
 
-  (add-token 't-number (parse-float *parsing* :start *start* :end *current*)))
+  (add-token 't-number (parse-float *scanning* :start *start* :end *current*)))
 
 (defun identifier ()
   (loop while (alpha-numeric-p (peek))
 	do (advance))
-  (let* ((val (subseq *parsing* *start* *current*))
+  (let* ((val (subseq *scanning* *start* *current*))
 	 (tok (gethash val *keywords*)))
     (add-token (if tok tok 't-identifier))))
 
@@ -130,7 +130,7 @@
 	  )))
 
 (defun scan (str on-error)
-  (let ((*parsing* str)
+  (let ((*scanning* str)
 	(*on-error* on-error)
 	(*start* 0)
 	(*current* 0)
