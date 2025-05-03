@@ -9,6 +9,7 @@
 	       (:file "src/scanner")
 	       (:file "src/parser")
 	       (:file "src/ast")
+	       (:file "src/interpreter")
 	       (:file "src/pretty-print")
 	       (:file "src/lox")))
 
